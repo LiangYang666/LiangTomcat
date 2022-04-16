@@ -22,6 +22,8 @@ public class MyTomcat {
             InputStream inputStream = clientSocket.getInputStream();
             Request request = new Request(inputStream);
             System.out.println(request);
+            Response response = new Response(clientSocket.getOutputStream());
+            response.write(request.getUrl()+"---Hello world！");
         } catch (IOException e) {
             e.printStackTrace();
         }
