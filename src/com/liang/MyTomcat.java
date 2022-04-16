@@ -23,7 +23,8 @@ public class MyTomcat {
             Request request = new Request(inputStream);
             System.out.println(request);
             Response response = new Response(clientSocket.getOutputStream());
-            response.write(request.getUrl()+"---Hello world！");
+            HelloServlet helloServlet = new HelloServlet();
+            helloServlet.service(request, response);
         } catch (IOException e) {
             e.printStackTrace();
         }
