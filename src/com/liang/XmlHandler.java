@@ -20,13 +20,6 @@ public class XmlHandler {
     private final HashMap<String, HttpServlet> servletMapping = new HashMap<>();
     private final HashMap<String, String> urlMapping = new HashMap<>();
 
-    public static void main(String[] args) {
-        String filePath ="web.xml";
-        XmlHandler xmlHandler = new XmlHandler(filePath);
-        System.out.println(xmlHandler.getServletMapping());
-        System.out.println(xmlHandler.getUrlMapping());
-    }
-
     public XmlHandler(String filePath) {
         try {
             FileInputStream in = new FileInputStream(filePath);
