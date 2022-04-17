@@ -13,27 +13,44 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class MyTomcat {
-    public static void main(String[] args) {
-        int port = 8099;
+    private final int port;
+    private final HashMap<String, HttpServlet> servletMapping;
+    private final HashMap<String, String> urlMapping;
+
+    public static void main(String[] args) throws IOException {
+        MyTomcat myTomcat = new MyTomcat(8099);
+        myTomcat.start();
+    }
+
+    public MyTomcat(int port) {
+        this.port = port;
+        XmlHandler xmlHandler = new XmlHandler("web.xml");
+        servletMapping = xmlHandler.getServletMapping();
+        urlMapping = xmlHandler.getUrlMapping();
+    }
+    public void start(){
+        ServerSocket serverSocket = null;   // 绑定端口，创建监听socket
         try {
-            XmlHandler xmlHandler = new XmlHandler("web.xml");
-            HashMap<String, HttpServlet> servletMapping = xmlHandler.getServletMapping();
-            HashMap<String, String> urlMapping = xmlHandler.getUrlMapping();
-            ServerSocket serverSocket = new ServerSocket(port);   // 绑定端口，创建监听socket
-            System.out.printf("端口%d 等待连接\n", port);
-            Socket clientSocket = serverSocket.accept();     // 等待连接，连接到则创建新socket
-            System.out.println(clientSocket);
-            InputStream inputStream = clientSocket.getInputStream();
-            Request request = new Request(inputStream);
-            System.out.println(request);
-            Response response = new Response(clientSocket.getOutputStream());
-
-            String servletName = urlMapping.get(request.getUrl());
-            HttpServlet httpServlet = servletMapping.get(servletName);
-            httpServlet.service(request, response);
-
+            serverSocket = new ServerSocket(port);
+            while (true){
+                System.out.printf("端口%d 等待连接\n", port);
+                Socket clientSocket = serverSocket.accept();     // 等待连接，连接到则创建新socket
+                System.out.println(clientSocket);
+                InputStream inputStream = clientSocket.getInputStream();
+                Request request = new Request(inputStream);
+                System.out.println(request);
+                Response response = new Response(clientSocket.getOutputStream());
+                dispatch(request, response);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void dispatch(Request request, Response response){
+        String servletName = urlMapping.get(request.getUrl());
+        HttpServlet httpServlet = servletMapping.get(servletName);
+        if(httpServlet != null)
+            httpServlet.service(request, response);
     }
 }

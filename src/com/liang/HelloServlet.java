@@ -1,6 +1,8 @@
 package com.liang;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @Description: TODO
@@ -10,8 +12,11 @@ import java.io.IOException;
 public class HelloServlet extends HttpServlet {
     @Override
     public void doGet(Request request, Response response) {
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateStr = sdf.format(date);
         try {
-            response.write(request.getUrl()+"--- Hello Servlet！");
+            response.write(dateStr+" - "+request.getUrl()+"--- Hello Servlet！");
         } catch (IOException e) {
             e.printStackTrace();
         }
