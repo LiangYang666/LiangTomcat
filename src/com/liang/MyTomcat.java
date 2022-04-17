@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.Scanner;
+import java.util.concurrent.*;
 
 public class MyTomcat {
     private final int port;
@@ -32,12 +32,13 @@ public class MyTomcat {
         ServerSocket serverSocket = null;   // 绑定端口，创建监听socket
         try {
             serverSocket = new ServerSocket(port);
+            ThreadPoolExecutor executors = new ThreadPoolExecutor(100, 100, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
             while (true){
                 System.out.printf("端口%d 等待连接\n", port);
                 Socket clientSocket = serverSocket.accept();     // 等待连接，连接到则创建新socket
-                new Thread(() -> {  //  创建线程连接
+                executors.submit(() -> {
                     System.out.println(clientSocket);
-                    InputStream inputStream = null;
+                    InputStream inputStream;
                     try {
                         inputStream = clientSocket.getInputStream();
                         Request request = new Request(inputStream);
@@ -47,7 +48,7 @@ public class MyTomcat {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }).start();
+                });
             }
         } catch (IOException e) {
             e.printStackTrace();
