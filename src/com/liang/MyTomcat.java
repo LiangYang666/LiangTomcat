@@ -35,12 +35,19 @@ public class MyTomcat {
             while (true){
                 System.out.printf("端口%d 等待连接\n", port);
                 Socket clientSocket = serverSocket.accept();     // 等待连接，连接到则创建新socket
-                System.out.println(clientSocket);
-                InputStream inputStream = clientSocket.getInputStream();
-                Request request = new Request(inputStream);
-                System.out.println(request);
-                Response response = new Response(clientSocket.getOutputStream());
-                dispatch(request, response);
+                new Thread(() -> {  //  创建线程连接
+                    System.out.println(clientSocket);
+                    InputStream inputStream = null;
+                    try {
+                        inputStream = clientSocket.getInputStream();
+                        Request request = new Request(inputStream);
+                        System.out.println(request);
+                        Response response = new Response(clientSocket.getOutputStream());
+                        dispatch(request, response);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
