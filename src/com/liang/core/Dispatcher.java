@@ -1,11 +1,10 @@
-package com.liang;
+package com.liang.core;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -16,11 +15,11 @@ import java.util.List;
  * @Author: LiangYang
  * @Date: 2022/4/16 下午9:06
  **/
-public class XmlHandler {
-    private final HashMap<String, HttpServlet> servletMapping = new HashMap<>();
+public class Dispatcher {
+    private final HashMap<String, Servlet> servletMapping = new HashMap<>();
     private final HashMap<String, String> urlMapping = new HashMap<>();
 
-    public XmlHandler(String filePath) {
+    public Dispatcher(String filePath) {
         try {
             FileInputStream in = new FileInputStream(filePath);
             SAXReader sr = new SAXReader();
@@ -34,7 +33,7 @@ public class XmlHandler {
                 } else if (element.getName().equals("servlet")) {
                     String servletName = element.elementTextTrim("servlet-name");
                     String className = element.elementTextTrim("servlet-class");
-                    HttpServlet HttpServlet = (HttpServlet) Class.forName(className).newInstance();
+                    Servlet HttpServlet = (Servlet) Class.forName(className).newInstance();
                     servletMapping.put(servletName, HttpServlet);
                 }
             }
@@ -44,12 +43,12 @@ public class XmlHandler {
             e.printStackTrace();
         }
     }
-
-    public HashMap<String, HttpServlet> getServletMapping() {
-        return servletMapping;
-    }
-
-    public HashMap<String, String> getUrlMapping() {
-        return urlMapping;
+    public void dispatch(Request request, Response response){
+        String servletName = urlMapping.get(request.getUrl());
+        Servlet httpServlet = servletMapping.get(servletName);
+        if(httpServlet != null)
+            httpServlet.service(request, response);
+        else
+            ResourceServlet.getResourceServlet().service(request, response);
     }
 }
